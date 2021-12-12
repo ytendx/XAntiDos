@@ -13,4 +13,19 @@
         <maven.compiler.target>8</maven.compiler.target>
     </properties>
 
+    <repositories>
+        <repository>
+            <id>auna-repo</id>
+            <url>http://aunacraft.net:8081/repository/auna/</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>net.md-5</groupId>
+            <artifactId>bungeecord-module-cmd-find</artifactId>
+            <version>1.17-R0.1-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+
 </project>

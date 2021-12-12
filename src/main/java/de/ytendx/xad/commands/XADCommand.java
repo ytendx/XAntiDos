@@ -13,20 +13,7 @@ public class XADCommand extends Command {
 
     @Override
     public void execute(CommandSender commandSender, String[] strings) {
-        if (commandSender instanceof ProxiedPlayer) {
-            if (strings.length == 1) {
-                if (strings[0].equalsIgnoreCase("notify")) {
-                    XAntiDos.getInstance().getDoSCheck().notifiers.add((ProxiedPlayer) commandSender);
-                }
-            }else{
-                if(commandSender.hasPermission("xad.command")){
-                    commandSender.sendMessage(new TextComponent("§c§lXAntiDos §7by §eytendx"));
-                    commandSender.sendMessage(new TextComponent(" "));
-                    commandSender.sendMessage(new TextComponent("§eUse:"));
-                    commandSender.sendMessage(new TextComponent("§f/xad notify §7- §eShows notifications"));
-                    commandSender.sendMessage(new TextComponent("§f/xad reset §7- §eResets blocked IPs"));
-                }
-            }
-        }
+        commandSender.sendMessage(new TextComponent("§8[§eXAD§8] §6§lXAntiDos §7v2 by §eytendx"));
+        commandSender.sendMessage(new TextComponent("§8[§eXAD§8] §7Blocks large payload attacks and blocks invalid stuff."));
     }
 }

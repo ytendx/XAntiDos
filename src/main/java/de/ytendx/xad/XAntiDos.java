@@ -23,32 +23,19 @@ public class XAntiDos extends Plugin {
     @Override
     public void onEnable() {
         instance = this;
-        this.getProxy().getLogger().info(
-                "\n              ___    __   __   __  \n" +
-                    "\\_/  /\\  |\\ |  |  | |  \\ /  \\ /__` \n" +
-                    "/ \\ /~~\\ | \\|  |  | |__/ \\__/ .__/ \n" +
-                    "                                   ");
+        this.getProxy().getLogger().info("[XAD] Starting up XAntiDos...");
         this.doSCheck = new DoSCheck();
+        this.getProxy().getLogger().info("[XAD] Initialize dos-check succesfully!");
         new XADCommand();
         this.getProxy().getPluginManager().registerListener(this, new ConnectionListener());
         super.onEnable();
-        try {
-            this.toggleIPTables(25565, true);
-            this.toggleIPTables(25577, true);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        this.getProxy().getLogger().info("[XAD] Did adaption for BungeeCord.");
+        this.getProxy().getLogger().info("[XAD] Succesfully started up!");
     }
 
     @Override
     public void onDisable() {
         this.doSCheck.cpsThread.stop();
-        try {
-            this.toggleIPTables(25565, false);
-            this.toggleIPTables(25577, false);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         System.out.println("[XAD] Successfully deactivated and disabled!");
         super.onDisable();
     }

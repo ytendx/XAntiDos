@@ -26,11 +26,6 @@ public class ConnectionListener implements Listener {
     }
 
     @EventHandler
-    public void handleLogin(PostLoginEvent event) {
-        System.out.println("Country: " + event.getPlayer().getLocale().getCountry());
-    }
-
-    @EventHandler
     public void handlePreLogin(PreLoginEvent event){
         XAntiDos.getInstance().getDoSCheck().currentConnectingPlayers++;
         if(XAntiDos.getInstance().getDoSCheck().currentConnectingPlayers > 10){
@@ -38,44 +33,19 @@ public class ConnectionListener implements Listener {
             event.setCancelled(true);
             return;
         }
-        if(ProxyServer.getInstance().getConfig().isOnlineMode()){
-            if(!event.getConnection().isOnlineMode() || !event.getConnection().isLegacy()){
-                event.getConnection().disconnect(new TextComponent("Blocked by XAntiDos"));
-                System.out.println("[/" + ((InetSocketAddress) event.getConnection().getSocketAddress()).getAddress().getHostAddress() + "] -> Player is suspicious!");
-                XAntiDos.getInstance().getDoSCheck().blockIP(((InetSocketAddress) event.getConnection().getSocketAddress()).getAddress().getHostAddress());
-            }
-        }else{
-            if (XAntiDos.getInstance().getDoSCheck().isBlockedName(event.getConnection().getName())) {
-                event.getConnection().disconnect(new TextComponent("Blocked by XAntiDos"));
-                System.out.println("[/" + ((InetSocketAddress) event.getConnection().getSocketAddress()).getAddress().getHostAddress() + "] -> Playername contains blocked chars!");
-                XAntiDos.getInstance().getDoSCheck().blockIP(((InetSocketAddress) event.getConnection().getSocketAddress()).getAddress().getHostAddress());
-            }else if(XAntiDos.getInstance().getDoSCheck().containsLetters(event.getConnection().getName())){
-                event.getConnection().disconnect(new TextComponent("Blocked by XAntiDos"));
-                System.out.println("[/" + ((InetSocketAddress) event.getConnection().getSocketAddress()).getAddress().getHostAddress() + "] -> Playername only contains Numbers!");
-                XAntiDos.getInstance().getDoSCheck().blockIP(((InetSocketAddress) event.getConnection().getSocketAddress()).getAddress().getHostAddress());
-            }
-        }
     }
 
     @EventHandler
     public void handleHandshake(PlayerHandshakeEvent event) {
+        XAntiDos.getInstance().getDoSCheck().adapt(event);
         if (event.getHandshake().getHost().equalsIgnoreCase("localhost") || event.getHandshake().getHost().equalsIgnoreCase("127.0.0.1")) {
             XAntiDos.getInstance().getDoSCheck().blockedConnections++;
-            System.out.println("[/" + ((InetSocketAddress) event.getConnection().getSocketAddress()).getAddress().getHostAddress() + "] -> Connected with local IP (QueueBot/InstantCrasher)");
             event.getConnection().disconnect(new TextComponent("Blocked by XAntiDos"));
-            XAntiDos.getInstance().getDoSCheck().blockIP(((InetSocketAddress) event.getConnection().getSocketAddress()).getAddress().getHostAddress());
         }
         if (!(event.getHandshake().getRequestedProtocol() == 1 || event.getHandshake().getRequestedProtocol() == 2)) {
             XAntiDos.getInstance().getDoSCheck().blockedConnections++;
-            System.out.println("[/" + ((InetSocketAddress) event.getConnection().getSocketAddress()).getAddress().getHostAddress() + "] -> Invalid Request Protocol");
             event.getConnection().disconnect(new TextComponent("Blocked by XAntiDos"));
-            XAntiDos.getInstance().getDoSCheck().blockIP(((InetSocketAddress) event.getConnection().getSocketAddress()).getAddress().getHostAddress());
-        }
-        XAntiDos.getInstance().getDoSCheck().totalConnections++;
-        if (XAntiDos.getInstance().getDoSCheck().handleConnection(event.getConnection().getSocketAddress())) {
-            XAntiDos.getInstance().getDoSCheck().blockedConnections++;
-            event.getConnection().disconnect(new TextComponent("Blocked by XAntiDos"));
-            XAntiDos.getInstance().getDoSCheck().blockIP(((InetSocketAddress) event.getConnection().getSocketAddress()).getAddress().getHostAddress());
+            XAntiDos.getInstance().getDoSCheck().firewall(((InetSocketAddress) event.getConnection().getSocketAddress()).getAddress().getHostAddress(), "Invalid Request Protocol");
         }
     }
 
