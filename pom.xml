@@ -26,6 +26,12 @@
             <artifactId>bungeecord-module-cmd-find</artifactId>
             <version>1.17-R0.1-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>RELEASE</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
 </project>

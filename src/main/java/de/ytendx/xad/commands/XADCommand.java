@@ -13,7 +13,7 @@ public class XADCommand extends Command {
 
     @Override
     public void execute(CommandSender commandSender, String[] strings) {
-        commandSender.sendMessage(new TextComponent("§8[§eXAD§8] §6§lXAntiDos §7v2 by §eytendx"));
+        commandSender.sendMessage(new TextComponent("§8[§eXAD§8] §6§lXAntiDos §7v3 by §eytendx"));
         commandSender.sendMessage(new TextComponent("§8[§eXAD§8] §7Blocks large payload attacks and blocks invalid stuff."));
     }
 }

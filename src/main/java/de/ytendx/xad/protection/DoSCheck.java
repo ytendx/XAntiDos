@@ -1,5 +1,6 @@
 package de.ytendx.xad.protection;
 
+import lombok.Getter;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -16,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
-
+@Getter
 public class DoSCheck {
 
     public int totalConnections;
@@ -28,6 +29,8 @@ public class DoSCheck {
     private final HashMap<String, Long> lastConnections;
     private ConcurrentHashMap<String, Integer> packetCount;
     private CopyOnWriteArrayList<String> whitelisted;
+    private HashMap<String, Integer> motdPackts;
+    private HashMap<String, Integer> joinPackets;
     public int currentConnectingPlayers;
     private boolean notified = false;
     public final Thread cpsThread;
@@ -41,6 +44,8 @@ public class DoSCheck {
         this.notifiers = new ArrayList<>();
         this.packetCount = new ConcurrentHashMap<>();
         this.whitelisted = new CopyOnWriteArrayList<>();
+        this.motdPackts = new HashMap<>();
+        this.joinPackets = new HashMap<>();
         AtomicInteger connsBefore = new AtomicInteger();
         this.cpsThread = new Thread(() -> {
             while (true) {
@@ -51,23 +56,33 @@ public class DoSCheck {
                 if(cps > 100){
                     if(!notified){
                         for(ProxiedPlayer player : ProxyServer.getInstance().getPlayers()){
-                            if(!player.hasPermission("xad.info")){
-                                continue;
+                            if(player.hasPermission("xad.info")){
+                                notified = true;
+                                player.sendMessage(new TextComponent("§8[§eXAD§8] §7The server is §cunder attack§7. §7(§bSTRENGTH: " + (this.cps > 10000 ? "§4Strong" : this.cps > 5000 ? "§cNormal" : "§eLightweight") + "§7)"));
                             }
-                            notified = true;
-                            player.sendMessage(new TextComponent("§8[§eXAD§8] §7The server is §cunder attack§7. §7(§bSTRENGTH: " + (this.cps > 10000 ? "§4Strong" : this.cps > 5000 ? "§cNormal" : "§eLightweight") + "§7)"));
                         }
+                    }
+
+                    for(ProxiedPlayer player : ProxyServer.getInstance().getPlayers()){
+                        if(player.hasPermission("xad.info"))
+                        player.sendMessage(ChatMessageType.ACTION_BAR, new TextComponent("§cATTACK-INFO: §fCPS: §e" + cps + " §fBLOCKED: §e" + blockedConnections + " §fFIREWALLED: §e" + blockedIps.size()));
                     }
                 }else{
                     if(notified){
                         for(ProxiedPlayer player : ProxyServer.getInstance().getPlayers()){
-                            if(!player.hasPermission("xad.info")){
-                                continue;
+                            if(player.hasPermission("xad.info")){
+                                notified = false;
+                                player.sendMessage(new TextComponent("§8[§eXAD§8] §7The attack §astopped§7! (§c<100CPS)"));
                             }
-                            notified = false;
-                            player.sendMessage(new TextComponent("§8[§eXAD§8] §7The attack §astopped§7! (§c<100CPS)"));
                         }
                     }
+                }
+                synchronized (joinPackets){
+                    this.getJoinPackets().clear();
+                }
+
+                synchronized (motdPackts){
+                    this.getMotdPackts().clear();
                 }
                 try {
                     Thread.sleep(1000L);
@@ -80,10 +95,9 @@ public class DoSCheck {
             while (true) {
                 if(this.blockedIps.size() > 0){
                     for(ProxiedPlayer player : ProxyServer.getInstance().getPlayers()){
-                        if(!player.hasPermission("xad.info")) {
-                            continue;
+                        if(player.hasPermission("xad.info")){
+                            player.sendMessage(new TextComponent("§8[§eXAD§8] §7The firewall was reseted! §7(§bSIZE: §f" + this.blockedIps.size() + "§7)"));
                         }
-                        player.sendMessage(new TextComponent("§8[§eXAD§8] §7The firewall was reseted! §7(§bSIZE: §f" + this.blockedIps.size() + "§7)"));
                     }
                     this.blockedIps = new CopyOnWriteArrayList<>();
                 }
@@ -109,10 +123,6 @@ public class DoSCheck {
                 return false;
             }else this.packetCount.replace(ad.getHostAddress(), this.packetCount.get(ad.getHostAddress())+1);
         }
-        /*if (System.currentTimeMillis() - lastConnections.get(ad.getHostAddress()) < 1) {
-            firewall(ad.getHostAddress(), "Next connection in lower than 1ms");
-            return false;
-        }*/
 
         if (System.currentTimeMillis() - lastConnections.get(ad.getHostAddress()) > 1500 && !this.whitelisted.contains(ad.getHostAddress())) {
             firewall(ad.getHostAddress(), "Sent no minecraft packets");
@@ -142,6 +152,6 @@ public class DoSCheck {
     }
 
     public boolean isBlockedName(final String name) {
-        return name.toLowerCase(Locale.ROOT).contains("cipher") || name.toLowerCase(Locale.ROOT).contains("bot") || name.toLowerCase().contains("lauren") ;
+        return name.toLowerCase(Locale.ROOT).contains("cipher") || name.toLowerCase(Locale.ROOT).contains("bot") || name.toLowerCase().contains("lauren");
     }
 }
